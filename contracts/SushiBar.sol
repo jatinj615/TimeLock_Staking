@@ -34,12 +34,24 @@ contract SushiBar is ERC20{
     function enter(uint256 _amount) public {
         uint256 totalSushi = sushi.balanceOf(address(this));
         uint256 totalShares = totalSupply();
+        bytes32 stakeId = getStakeIdForUser(msg.sender);
         if (totalShares == 0 || totalSushi == 0) {
+            userStakings[stakeId] = UserStake(
+                block.timestamp,
+                _amount,
+                msg.sender
+            );
             _mint(msg.sender, _amount);
         } else {
             uint256 what = _amount.mul(totalShares).div(totalSushi);
+            userStakings[stakeId] = UserStake(
+                block.timestamp,
+                what,
+                msg.sender
+            );
             _mint(msg.sender, what);
         }
+        ++userStakingCount[msg.sender];
         sushi.transferFrom(msg.sender, address(this), _amount);
     }
 
@@ -50,4 +62,14 @@ contract SushiBar is ERC20{
         _burn(msg.sender, _share);
         sushi.transfer(msg.sender, what);
     }
+
+
+    function getStakeIdForUser(address _user) public view returns (bytes32) {
+        return getStakeIdForUserAtIndex(_user, userStakingCount[_user]);
+    }
+
+    function getStakeIdForUserAtIndex(address _user, uint256 _userStakingIndex) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_user, _userStakingIndex));
+    }
+
 }
