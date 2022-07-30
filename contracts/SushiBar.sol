@@ -39,8 +39,8 @@ contract SushiBar is ERC20{
         if (totalShares == 0 || totalSushi == 0) {
             userStakings[stakeId] = UserStake(
                 block.timestamp,
-                _amount,
                 1,
+                _amount,
                 msg.sender
             );
             _mint(msg.sender, _amount);
@@ -48,18 +48,12 @@ contract SushiBar is ERC20{
             uint256 what = _amount.mul(totalShares).div(totalSushi);
             userStakings[stakeId] = UserStake(
                 block.timestamp,
-                what,
                 _amount.div(what),
+                what,
                 msg.sender
             );
             _mint(msg.sender, what);
         }
-        userStakings[stakeId] = UserStake(
-                block.timestamp,
-                _amount,
-                _amount.div(what),
-                msg.sender
-            );
         ++userStakingCount[msg.sender];
         sushi.transferFrom(msg.sender, address(this), _amount);
     }
@@ -78,17 +72,17 @@ contract SushiBar is ERC20{
         // calculate tax on rewards
         uint256 taxOnRewards = getTaxOnRewards(stake, rewards);
         uint256 what = (_share.mul(sushi.balanceOf(address(this))).div(totalShares)).sub(taxOnRewards);
-        userStakings.shares -= _share;
+        userStakings[stakingId].shares -= _share;
         _burn(msg.sender, _share);
         sushi.transfer(msg.sender, what);
     }
 
     function getTaxOnRewards(UserStake memory _stake, uint256 _reward) public view returns (uint256) {
         uint256 redeemCycle = ((block.timestamp).sub(_stake.startTimestamp)).div(intervalUnlockDuration);
-        if(redeemCycle > intervals) {
+        if(redeemCycle >= intervals) {
             return _reward;
         }
-        return (_reward.mul(interval - redeemCycle)).div(intervals);
+        return (_reward.mul(intervals - redeemCycle)).div(intervals);
     }
 
     function getUnstakeLimitForStake(UserStake memory _stake) public view returns (uint256) {
