@@ -71,7 +71,6 @@ contract SushiBar is ERC20{
         // calculate how much user can withdraw
         uint256 unstakeLimit = getUnstakeLimitForStake(stake);
         require(_share <= unstakeLimit, "ERR_SHARES_LOCKED");
-        uint256 what = getUnderlyingForShareAfterTax(_share, stake);
         uint256 totalShares = totalSupply();
         uint256 pricePerShare = sushi.balanceOf(address(this)).div(totalShares);
         // get rewards
@@ -98,16 +97,6 @@ contract SushiBar is ERC20{
             return balanceOf(msg.sender);
         }
         return (balanceOf(msg.sender).mul(redeemCycle)).div(intervals);
-    }
-
-    function getUnderlyingForShareAfterTax(uint256 _share, UserStake memory _stake) public view returns (uint256) {
-        uint256 totalShares = totalSupply();
-        uint256 totalShares = balanceOf(msg.sender);
-        uint256 redeemCycle = ((block.timestamp).sub(_stake.startTimestamp)).div(intervalUnlockDuration);
-        uint256 shareLimit =  (balanceOf(msg.sender).mul(redeemCycle)).div(intervals);
-        require(shareLimit > _share, "ERR_INSUFFICIENT_SHARES_UNLOCKED");
-        uint256 initialShareBalance = _stake.amount.div(_share);
-        uint256 rewardsOnShares = _share
     }
 
     function getTaxLimit() public view returns (uint256) {
