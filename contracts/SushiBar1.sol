@@ -43,7 +43,7 @@ contract SushiBar is ERC20{
                 _amount,
                 msg.sender
             );
-            _mint(msg.sender, _amount);
+            _mint(address(this), _amount);
         } else {
             uint256 what = _amount.mul(totalShares).div(totalSushi);
             userStakings[stakeId] = UserStake(
@@ -52,7 +52,7 @@ contract SushiBar is ERC20{
                 what,
                 msg.sender
             );
-            _mint(msg.sender, what);
+            _mint(address(this), what);
         }
         ++userStakingCount[msg.sender];
         sushi.transferFrom(msg.sender, address(this), _amount);
@@ -73,7 +73,7 @@ contract SushiBar is ERC20{
         uint256 taxOnRewards = getTaxOnRewards(stake, rewards);
         uint256 what = (_share.mul(sushi.balanceOf(address(this))).div(totalShares)).sub(taxOnRewards);
         userStakings[stakingId].shares -= _share;
-        _burn(msg.sender, _share);
+        _burn(address(this), _share);
         sushi.transfer(msg.sender, what);
     }
 
